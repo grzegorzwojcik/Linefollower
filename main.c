@@ -31,7 +31,7 @@
 int main(void)
 {
   int i = 0;
-
+// asdasd
   /* TODO - Add your application code here */
 
   a = 0;	// Ustawianie wartosci poczatkowej zmiennych ulotnych
