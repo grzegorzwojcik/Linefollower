@@ -2,11 +2,7 @@
 *****************************************************************************
 **
 **  File        : main.c
-**
-**  Abstract    : main function.
-**
-**  Functions   : main
-**
+**  Abstract    : main function
 **	Author		: Grzegorz Wojcik
 **
 *****************************************************************************
@@ -15,10 +11,12 @@
 /* Includes */
 #include <stddef.h>
 #include <stdlib.h>
-#include "stm32f10x.h"
+
+#include "ADC.h"
+#include "BTM.h"
 #include "functions.h"
 #include "MOTORS.h"
-#include "BTM.h"
+#include "stm32f10x.h"
 #include "STM32vldiscovery.h"
 
 /**
@@ -30,49 +28,62 @@
 */
 int main(void)
 {
-  int i = 0;
-// asdasd
-  /* TODO - Add your application code here */
+	uint8_t i = 0;
 
-  a = 0;	// Ustawianie wartosci poczatkowej zmiennych ulotnych
-  s = 0;
-  /* INICJALIZACJA PERYFERIOW */
-  SysTick_Config( SystemCoreClock/1000 );	// Licznik systemowy
-  //LED_INIT();								// Diody LED
-  MOTORS_init();							// Silniki + mostek TB6612
-  PWM_init();								// Kanaly PWM
-  TRANSFORMATOR_INIT();						// Przetwornica 8V
-  BTM_init();								// Bluetooth
+	a = 0;	// Ustawianie wartosci poczatkowej zmiennych ulotnych
 
-  GPIO_SetBits(GPIOB, GPIO_Pin_7);			// Wlaczenie mostka (PB7 = 1), wylaczenie (PB7 = 0)
+	RCC_ClocksTypeDef ClksFreq;
 
-  STM32vldiscovery_LEDInit(LED3);
-  STM32vldiscovery_LEDOn(LED3);
+	RCC_ADCCLKConfig(RCC_PCLK2_Div8);		// slowing down ADC clock to 1MHz
+	ADC_initGPIO();
+	ADC_init();
+	ADC_initDMA();
+	MOTORS_initPOWERSUPPLY();				// 8V motor buck converter
+	MOTORS_initGPIO();						// Motors + driver
+	MOTORS_initPWM();						// PWM channels
+	GPIO_SetBits(GPIOB, GPIO_Pin_7);		// Motor driver ON (PB7 = 1), OFF (PB7 = 0)
+	BTM_init();								// Bluetooth UART
+	LED_INIT();								// LEDs
 
-  s = SystemCoreClock;
+	SysTick_Config( 8000000/1000 );			// 1ms interrupt
+	RCC_GetClocksFreq(&ClksFreq);
+	/* Start ADC1 conversion */
+	ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 
-  	  /* DEFINICJA ZMIENNYCH ULOTNYCH */
-	  flag = 0;
-	  flag_mode = 1;				//Domyslnie ustawiona w tryb manualny
-	  flag_mode_source = 0;
-	  flag_motor_ctrl = 0;
-	  flag_pid_ctrl = 0;
-	  /* Parametry istotne w trybie autonomicznym */
-	  Kp = 1;	  Kd = 1;	  Ki = 1;
-	  base_speed = 50;
+	/* DEFINICJA ZMIENNYCH ULOTNYCH */
+	flag = 0;
+	flag_mode = 1;				//Domyslnie ustawiona w tryb manualny
+	flag_mode_source = 0;
+	flag_motor_ctrl = 0;
+	flag_pid_ctrl = 0;
+	/* Parametry istotne w trybie autonomicznym */
+	Kp = 1;	  Kd = 1;	  Ki = 1;
+	base_speed = 50;
 
-	  /* Zerowanie bufora */
-	  for( i = 0; i < 30; i++ ){
-		  received_frame[i] = 0;
-	  }
+	/* Clearing data frame */
+	for( i = 0; i < 30; i++ ){
+	  received_frame[i] = 0;
+	}
 
-  /* Infinite loop */
-  while (1)
-  {
+	static uint16_t Battery_voltage = 0;
+	/* Infinite loop */
+	while (1)
+	{
+		if( a % 500 == 0){
+			Battery_voltage = ADC_battery();
+			if( Battery_voltage < 3000)
+				GPIO_SetBits(GPIOB, GPIO_Pin_12);
+			else
+				GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+		}
 	  /* OBSLUGA RAMEK DANYCH */
-	  MODE_HANDLER();
-  }
+	  //MODE_HANDLER();
+	}
 }
+
+
+
+
 
 
 /*
@@ -91,17 +102,4 @@ void __assert(const char *file, int line, const char *failedexpr)
 {
    __assert_func (file, line, NULL, failedexpr);
 }
-
-/*
- 	if( flag == 1 ){
-		analyze_frame();
-		if( analyzed_frame[1] == 1 ){
-			flag_mode = analyzed_frame[2];
-		}
-		if( analyzed_frame[1] == 2 ){
-			flag_motor_ctrl = 1;
-		}
-		flag = 0;
-	}
- */
 

@@ -25,7 +25,6 @@ volatile unsigned char received_frame[30];		/* Bufor, odebrana ramka danych */
 volatile int16_t analyzed_frame[20];			/* Przeanalizowana ramka danych */
 
 
-void TRANSFORMATOR_INIT(void);
 void LED_INIT(void);
 void LED_BLINK(void);
 void MODE_HANDLER(void);

@@ -9,6 +9,8 @@
 #include <stddef.h>
 #include "stm32f10x.h"
 
+#include "MOTORS.h"
+
 
 /*** W PLIKU MAIN NALEZY DOLACZYC BIBLIOTEKE #include "MOTORS.h"
  *	W funkcji glownej nalezy zamiescic "MOTORS_init(void)", a nastepnie "PWM_init(void)"
@@ -23,7 +25,27 @@
  * 	TIM3 -> CCR4 = 0 mamy zerowe wypelnienie kanalu 4 timera 3.
  * 	***/
 
-void MOTORS_init(void){
+/* Inicjalizacja przetwornicy 8V (ustawienie zworki na piny EN + uC
+ * zwykle usawienie portow GPIO, ustawienie PC10 = 1 wlacza przetwornice 8V
+ * 											PC10 = 0 wylaczenie przetwornicy
+ * 		istnieje mozliwosc ustawienia zworki na piny V_IN + EN, wowczas przetwornica
+ * 		jest caly czas wlaczona bez koniecznosci uzywania programu
+ */
+void MOTORS_initPOWERSUPPLY(void){
+	/* Zasilenie portu B i D*/
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+
+	GPIO_InitTypeDef GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+	/* PRZETWORNICA WLACZONA PRZY INICJALIZACJI */
+	GPIO_SetBits(GPIOC, GPIO_Pin_10);
+}
+
+void MOTORS_initGPIO(void){
 
 	/* Zasilenie portu B */
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
@@ -39,17 +61,14 @@ void MOTORS_init(void){
 		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9;
 		GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-
-
 	/* Poczatkowa konfiguracja: mostek wylaczony (PB7=0); wlaczenie mostka (PB7=1);
 	 * oby dwa silniki wylaczone (PB5 | PB6 | PB8 | PB9 = 0 )
 	 * wlaczone kanaly PWM
 	 */
 	GPIO_ResetBits(GPIOB, GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_8 | GPIO_Pin_9);
-
 }
 
-void PWM_init(void){
+void MOTORS_initPWM(void){
 
 	/* wyliczenie wartosci prescalera */
 	uint16_t PrescalerValue = (uint16_t) (SystemCoreClock / 24000000) - 1;
@@ -154,7 +173,6 @@ void MOTOR_set(int16_t MOT_LEFT, int16_t MOT_RIGHT){
 		GPIO_SetBits(GPIOB, GPIO_Pin_6);
 		GPIO_ResetBits(GPIOB, GPIO_Pin_5);
 	}
-
 
 	if( TIM3->CCR3 != MOT_LEFT ){
 		if( MOT_LEFT < 0 )

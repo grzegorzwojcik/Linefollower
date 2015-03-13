@@ -8,7 +8,10 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include "stm32f10x.h"
+#include "STM32vldiscovery.h"
 #include "functions.h"
+#include "BTM.h"
+
 
 
 void BTM_init(void){
@@ -58,8 +61,7 @@ void BTM_init(void){
 
 
 		/* Enable the USART1 */
-		USART_Cmd(USART1, ENABLE);				// again all the properties are passed to the USART_Init function which takes care of all the bit setting
-
+		USART_Cmd(USART1, ENABLE);
 		/* Here the USART1 receive interrupt is enabled
 		 * and the interrupt controller is configured
 		 * to jump to the USART1_IRQHandler() function
@@ -91,25 +93,25 @@ void USART_puts(USART_TypeDef* USARTx, volatile char *s){
 void USART1_IRQHandler(void){
 
 	if( USART_GetITStatus(USART1, USART_IT_RXNE) ){
-
 		static uint8_t cnt = 0; // this counter is used to determine the string length
-		char t = USART1->DR; // the character from the USART6 data register is saved in t
-		if( (flag == 0) ){
-			if( t == '%' ){
-				cnt = 0;
-				received_frame[cnt] = t;	// Pierwszy znak ramki to '$' czyli 36
-				cnt++;
-			}
-			if( (t != '%') & (cnt > 0) ){	// Odbior znakow pomiedzy poczatkiem ramki % a koncem \n
-				received_frame[cnt] = t;
-				cnt++;
-				if( t == 10 ){				// Ostatni znak ramki to LF czyli 10
-					//cnt = 0;
-					flag = 1;
-				}
-			}
-		}
+		char t = USART1->DR; 	// the character from the USART6 data register is saved in t
 
+		if(t != '\n' && cnt < MAX_STRLEN){	// sprawdzamy czy pojawiajacy sie znak nie jest znakiem konca linii
+											// oraz sprawdzamy czy liczba znaków odbieranych nie przekracza wielkosci bufora MAX_STRLEN
+			BUFFOR[cnt] = t;
+			cnt++;
+		}
+		else{ // jesli pojawi sie znak konca linii lub bufor jest przepelniony wowczas zeruje licznik odebranych znakow i wysylamy znaki znajdujace sie w buforze
+
+			/* W momencie, gdy nowoodebrany ciag znakow jest krotszy od poprzednio
+			odebranego nalezy wykasowac smieci pozostale w buforze	*/
+			for(cnt = cnt; cnt < sizeof(BUFFOR); cnt++){
+				BUFFOR[cnt] = NULL;
+			}
+			cnt = 0;
+			BTM_dataparse();
+			MODE_HANDLER();
+		}
 	}
 }
 

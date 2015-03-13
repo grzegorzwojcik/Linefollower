@@ -8,18 +8,16 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include "stm32f10x.h"
-#include "functions.h"
 #include "STM32vldiscovery.h"
+#include "functions.h"
 
 void SysTick_Handler(void)
 {
 	a++;
 	LED_BLINK();
 	if( a >= 1000 ){
-
 		a = 0;
 	}
-
 
 }
 
@@ -36,7 +34,7 @@ void LED_INIT(void){
 	 * PB14 - LED2 (niebieska spod)
 	 * PB15 - LED1 (niebieska spod)
 	 *
-	 * LEDY z listwy z czujnikami
+	 * LEDY z plytki z czujnikami
 	 * PD1 - right LED
 	 * PB2 - left LED
 	 */
@@ -60,41 +58,8 @@ void LED_INIT(void){
 }
 
 
-/* Inicjalizacja przetwornicy 8V (ustawienie zworki na piny EN + uC
- * zwykle usawienie portow GPIO, ustawienie PC10 = 1 wlacza przetwornice 8V
- * 											PC10 = 0 wylaczenie przetwornicy
- * 		istnieje mozliwosc ustawienia zworki na piny V_IN + EN, wowczas przetwornica
- * 		jest caly czas wlaczona bez koniecznosci uzywania programu
- */
-void TRANSFORMATOR_INIT(void){
-	/* Zasilenie portu B i D*/
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
-
-	GPIO_InitTypeDef GPIO_InitStructure;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
-	GPIO_Init(GPIOC, &GPIO_InitStructure);
-
-	/* PRZETWORNICA WLACZONA PRZY INICJALIZACJI */
-	GPIO_SetBits(GPIOC, GPIO_Pin_10);
-}
-
-
 /* Mruganie diodami */
 void LED_BLINK(void){
-	/* LEDY Z PRZODU */
-	if( a == 500 ){
-		GPIO_SetBits(GPIOD, GPIO_Pin_1);	//prawa
-		GPIO_SetBits(GPIOB, GPIO_Pin_2);	//lewa
-		//STM32vldiscovery_LEDToggle(LED3);
-	}
-
-	if( a >= 1000){
-		GPIO_ResetBits(GPIOB, GPIO_Pin_2);
-		GPIO_ResetBits(GPIOD, GPIO_Pin_1);
-		STM32vldiscovery_LEDToggle(LED3);
-	}
 
 }
 
@@ -110,7 +75,7 @@ void LED_BLINK(void){
  * ramka[4] = 500
  * ramka[5] - 10	// to odpowiada znakowi LF
  */
-void analyze_frame(void){
+void BTM_dataparse(void){
 
 	/* Liczniki pomocnicze */
 	uint8_t i = 0;
@@ -168,7 +133,7 @@ void MODE_HANDLER(void){
 		volatile uint16_t base_speed;		// Bazowa predkosc silnikow (istotna w trybie autonomicznym)
 	 */
 	if( flag == 1 ){
-		analyze_frame();
+		BTM_dataparse();
 		switch ( analyzed_frame[1] ) {
 			case 1:
 				flag_mode = analyzed_frame[2]; // flag_mode == 0 (manual mode), flag_mode == 1 (autonomous mode)
