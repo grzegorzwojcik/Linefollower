@@ -17,7 +17,6 @@
 #include "functions.h"
 #include "MOTORS.h"
 #include "stm32f10x.h"
-#include "STM32vldiscovery.h"
 
 /**
 **===========================================================================
@@ -51,6 +50,7 @@ int main(void)
 	ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 
 	/* DEFINICJA ZMIENNYCH ULOTNYCH */
+	PID_initSTRUCTURE();
 	flag = 0;
 	flag_mode = 1;				//Domyslnie ustawiona w tryb manualny
 	flag_mode_source = 0;
@@ -66,16 +66,23 @@ int main(void)
 	}
 
 	static uint16_t Battery_voltage = 0;
-	/* Infinite loop */
+	static uint16_t prog = 0;
+
+	/* Main loop */
 	while (1)
 	{
 		if( a % 500 == 0){
 			Battery_voltage = ADC_battery();
-			if( Battery_voltage < 3000)
+			if( Battery_voltage < 2900)
 				GPIO_SetBits(GPIOB, GPIO_Pin_12);
 			else
 				GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+
+			//prog = SENSOR_Calibration();
+			SENSOR_ProcessData(prog);
 		}
+
+
 	  /* OBSLUGA RAMEK DANYCH */
 	  //MODE_HANDLER();
 	}
