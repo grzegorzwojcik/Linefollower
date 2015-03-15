@@ -236,7 +236,6 @@ void BTM_ProcessBuffor(void){
 
 
 	/* C# APPLICATION SECTION */
-
 	if( flag_mode == 2)
 	{
 		switch( analyzed_frame[4] ) {
@@ -257,8 +256,8 @@ void BTM_ProcessBuffor(void){
 			PID_Struct.Kp = analyzed_frame[2];
 			PID_Struct.Kd = analyzed_frame[3];
 			PID_Struct.Ki = analyzed_frame[4];
-			PID_Struct.BaseSpeed = analyzed_frame[5];
-
+			PID_Struct.BaseSpeed = (analyzed_frame[5] * 660)/100;
+			// Base speed is sent as 0-100% range. Conversion from % to 0-660 range is needed.
 			flag_pid_ctrl = 0;
 		}
 	}

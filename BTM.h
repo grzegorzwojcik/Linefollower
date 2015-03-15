@@ -16,7 +16,7 @@ volatile char BUFFOR[MAX_STRLEN];
 extern volatile uint16_t buforADC[14];
 
 /* FLagi poszczegolnych czynnosci */
-volatile uint8_t Flag_Start; 			// Flag_Start to flaga uruchamiajaca (= 1) lub zatrzymujaca (= 0) robota w trybie autonomicznym,
+volatile uint8_t Flag_Start; 		// Flag_Start to flaga uruchamiajaca (= 1) lub zatrzymujaca (= 0) robota w trybie autonomicznym,
 volatile uint8_t flag_mode;			// Wybor trybu, flag_mode = 1 (manual), flag_mode = 2 (autonomous)
 volatile uint8_t flag_mode_source;	// Wybor zrodla flag_mode_source =1 (PC), flag_mode_source = 2 (SMARTPHONE)
 volatile uint8_t flag_motor_ctrl;	// Flaga obslugi silnikow
