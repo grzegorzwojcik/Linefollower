@@ -65,21 +65,22 @@ int main(void)
 	  received_frame[i] = 0;
 	}
 
-	static uint16_t Battery_voltage = 0;
-	static uint16_t prog = 0;
+
 
 	/* Main loop */
 	while (1)
 	{
 		if( a % 500 == 0){
+			static uint16_t Battery_voltage = 0;
 			Battery_voltage = ADC_battery();
-			if( Battery_voltage < 2900)
+			if( Battery_voltage < 3000)
 				GPIO_SetBits(GPIOB, GPIO_Pin_12);
 			else
 				GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+		}
 
-			//prog = SENSOR_Calibration();
-			SENSOR_ProcessData(prog);
+		if( a % 1 == 0 ){
+			SENSOR_ProcessData(PID_Struct.Threshold);
 		}
 
 

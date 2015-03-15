@@ -50,7 +50,7 @@ uint16_t SENSOR_Calibration(void){
 int16_t SENSOR_ProcessData(uint16_t threshold){
 
 	static uint16_t sensor_array[13] = {0};
-	static uint16_t sensor_weight[13] = {-35, -25, -20, -15, -10, -5,
+	static int16_t sensor_weight[13] = {-35, -25, -20, -15, -10, -5,
 										 0,
 										 5, 10, 15, 20, 25, 35};
 
