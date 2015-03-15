@@ -23,10 +23,6 @@ volatile uint8_t flag_motor_ctrl;	// Flaga obslugi silnikow
 volatile uint8_t flag_pid_ctrl;		// Flaga obslugi parametrow regulatora PID
 volatile uint8_t flag_apk;			// Flaga obslugi zadan wysylanych z poziomu aplikacji
 
-volatile uint8_t Kp, Kd, Ki;		// Parametry regulatora PID
-volatile uint16_t base_speed;		// Bazowa predkosc silnikow (istotna w trybie autonomicznym)
-
-
 volatile unsigned char received_frame[30];		/* Bufor, odebrana ramka danych */
 volatile int16_t analyzed_frame[20];			/* Przeanalizowana ramka danych */
 

@@ -17,11 +17,7 @@
 #include "stm32f10x_dma.h"
 #include <misc.h>
 
-/**
-  * @brief  ADC1 initialization
-  * @param  None
-  * @retval None
-  */
+
 void ADC_init(void)
 {
 	ADC_InitTypeDef ADC_InitStructure;
@@ -57,12 +53,6 @@ void ADC_init(void)
 	ADC_DMACmd(ADC1, ENABLE);
 }
 
-
-/**
-  * @brief  ADC1 GPIO initialization
-  * @param  None
-  * @retval None
-  */
 void ADC_initGPIO(void)
 {
 
@@ -83,11 +73,7 @@ void ADC_initGPIO(void)
 
 }
 
-/**
-  * @brief  DMA1 initialization
-  * @param  None
-  * @retval None
-  */
+
 void ADC_initDMA(void)
 {
 
@@ -113,12 +99,7 @@ void ADC_initDMA(void)
 	DMA_Cmd(DMA1_Channel1, ENABLE); 				// Wlacz kanal 0
 }
 
-/**
-  * @brief  Li-po voltage measurement
-  * @param  None
-  * @retval int
-  */
-uint16_t ADC_battery(void){
+void ADC_BatteryMonitor(void){
 
 	static uint8_t i = 0;
 	static uint16_t ADC_tab[3] = {0};
@@ -128,14 +109,16 @@ uint16_t ADC_battery(void){
 			ADC_tab[i] = buforADC[13];
 			i++;
 	}
-
-	if( i >= 3 ){
+	else{
 		ADC_tab[0] = ADC_tab[1];
 		ADC_tab[1] = ADC_tab[2];
 		ADC_tab[2] = buforADC[13];
 	}
 
 	voltage = (ADC_tab[0] + ADC_tab[1] + ADC_tab[2])/3;
-	return voltage;
+	if( voltage < 3000)
+		GPIO_SetBits(GPIOB, GPIO_Pin_12);
+	else
+		GPIO_ResetBits(GPIOB, GPIO_Pin_12);
 }
 

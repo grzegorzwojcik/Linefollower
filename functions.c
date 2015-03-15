@@ -17,6 +17,8 @@ void SysTick_Handler(void)
 {
 	a++;
 	LED_BLINK();
+
+	/* Counting up to 1 second ( reset after reaching it ) with resolution of 1 ms*/
 	if( a >= 1000 ){
 		a = 0;
 	}
@@ -25,18 +27,17 @@ void SysTick_Handler(void)
 
 
 void LED_INIT(void){
-
 	/* Zasilenie portu B i D*/
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
-	/* Inicjalizacja pinow do ktorych podpiete sa LEDy
-	 * PB12 - LED4 (czerwona)
-	 * PB13 - LED3 (zielona)
-	 * PB14 - LED2 (niebieska spod)
-	 * PB15 - LED1 (niebieska spod)
+	/* LEDs
+	 * PB12 - LED4 (RED)
+	 * PB13 - LED3 (GREEN)
+	 * PB14 - LED2 (BLUE BOTTOM LAYER)
+	 * PB15 - LED1 (BLUE BOTTOM LAYER)
 	 *
-	 * LEDY z plytki z czujnikami
+	 * LEDs -SENSOR BOARD
 	 * PD1 - right LED
 	 * PB2 - left LED
 	 */
@@ -59,7 +60,7 @@ void LED_INIT(void){
 	GPIO_ResetBits(GPIOB, GPIO_Pin_12 ); 		// Red LED off
 }
 
-/* Mruganie diodami */
+
 void LED_BLINK(void){
 
 }
@@ -79,7 +80,7 @@ void USART1_IRQHandler(void){
 		}
 		else{ // jesli pojawi sie znak konca linii lub bufor jest przepelniony wowczas zeruje licznik odebranych znakow i wysylamy znaki znajdujace sie w buforze
 
-			/* W momencie, gdy nowoodebrany ciag znakow jest krotszy od poprzednio
+			/* W momencie, gdy nowo odebrany ciag znakow jest krotszy od poprzednio
 			odebranego nalezy wykasowac smieci pozostale w buforze	*/
 			for(cnt = cnt; cnt < sizeof(BUFFOR); cnt++){
 				BUFFOR[cnt] = NULL;

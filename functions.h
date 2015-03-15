@@ -8,7 +8,7 @@
 #ifndef FUNCTIONS_H_
 #define FUNCTIONS_H_
 
-volatile int a,s;
+volatile int a;
 volatile uint8_t flag;
 
 

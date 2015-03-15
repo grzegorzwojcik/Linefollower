@@ -27,7 +27,14 @@
 */
 int main(void)
 {
-	a = 0;	// Ustawianie wartosci poczatkowej zmiennych ulotnych
+	/* Volatile variables definition */
+	PID_initSTRUCTURE();
+	flag = 0;
+	flag_mode = 1;				//Default configuration: manual mode
+	flag_mode_source = 0;
+	flag_motor_ctrl = 0;
+	flag_pid_ctrl = 0;
+	a = 0;
 
 	/* Clearing data frame */
 	static uint8_t i = 0;
@@ -52,38 +59,24 @@ int main(void)
 	/* Start ADC1 conversion */
 	ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 
-
-	/* DEFINICJA ZMIENNYCH ULOTNYCH */
-	PID_initSTRUCTURE();
-	flag = 0;
-	flag_mode = 1;				//Domyslnie ustawiona w tryb manualny
-	flag_mode_source = 0;
-	flag_motor_ctrl = 0;
-	flag_pid_ctrl = 0;
-	/* Parametry istotne w trybie autonomicznym */
-	Kp = 1;	  Kd = 1;	  Ki = 1;
-	base_speed = 50;
-
-
 	/* Main loop */
 	while (1)
 	{
 		if( a % 500 == 0){
-			static uint16_t Battery_voltage = 0;
-			Battery_voltage = ADC_battery();
-			if( Battery_voltage < 3000)
-				GPIO_SetBits(GPIOB, GPIO_Pin_12);
-			else
-				GPIO_ResetBits(GPIOB, GPIO_Pin_12);
+			ADC_BatteryMonitor();
 		}
 
-		/* TRYB AUTONOMICZNY */
-		if( a % 10 == 0 ){	// 100 Hz control loop
-			if( Flag_Start == 1){
-				SENSOR_ProcessData(PID_Struct.Threshold);
-				MOTOR_set(PID_Struct.BaseSpeed, PID_Struct.BaseSpeed);
+		/* 100 Hz control loop */
+		if( a % 10 == 0 ){
+
+			/* TRYB AUTONOMICZNY */
+			if( Flag_Start == 1){	// START
+				static int16_t PID = 0;
+				PID_Struct.Error_current = SENSOR_ProcessData(PID_Struct.Threshold);
+				PID = PID_controller();
+				MOTOR_set( PID_Struct.BaseSpeed + PID, PID_Struct.BaseSpeed - PID );
 			}
-			else
+			else					// STOP
 				MOTOR_set( 0, 0);
 
 			/* TRYB MANUALNY */
@@ -93,6 +86,7 @@ int main(void)
 		}
 	}
 }
+
 
 
 /*

@@ -12,7 +12,7 @@
 
 
 void PID_initSTRUCTURE(void){
-	PID_Struct.Threshold = 7000;
+	PID_Struct.Threshold = 5000;
 	PID_Struct.BaseSpeed = 0;
 
 	PID_Struct.Kp = 1;
@@ -21,18 +21,39 @@ void PID_initSTRUCTURE(void){
 
 	PID_Struct.Error_setpoint	 = 0;
 	PID_Struct.Error_current	 = 0;
-	PID_Struct.Error_previous	 = 0;
-	PID_Struct.Error_sum		 = 0;
-
 }
 
+int16_t PID_controller(void){
+	static uint8_t s = 0;
+	static int16_t output = 0;
+	static int16_t error_previous = 0;
+	static int16_t error_derivative = 0;
+	static float error_integral = 0;
 
-/**
-  * @brief  SENSOR calibration function. Black line should be placed under
-  * 			sensor 13, and white surface under sensor 7 (middle one)
-  * @param  None
-  * @retval None
-  */
+	/* Derivative and Integral term updated every 10 times slower than P */
+	if( s >= 10 ){
+		error_integral += (PID_Struct.Ki/1000)* PID_Struct.Error_current;
+		error_derivative = PID_Struct.Kd * (PID_Struct.Error_current - error_previous);
+		s = 0;
+		/* Anti wind-up	*/
+		if( error_integral > 50 )
+			error_integral = 50;
+		if( error_integral < -50 )
+			error_integral = -50;
+	}
+
+	output = PID_Struct.Kp * PID_Struct.Error_current
+				+ error_integral
+				+ error_derivative;
+	if( output <= -150 )	/* Protection from changing motor direction too much in case of huge error */
+		output = 150;
+
+	error_previous = PID_Struct.Error_current;	/* Zapamietanie bledu */
+	s++;
+
+	return output;
+}
+
 uint16_t SENSOR_Calibration(void){
 	static uint16_t threshold = 0;
 	threshold = ((buforADC[6]+buforADC[12])/2)-200;
@@ -42,11 +63,6 @@ uint16_t SENSOR_Calibration(void){
 	return threshold;
 }
 
-/**
-  * @brief  Function calculating error, which means how far, from the middle sensor, the black line is
-  * @param  threshold calculated by SENSOR_calibration (and volatile sensor table ADC_bufor[13])
-  * @retval error
-  */
 int16_t SENSOR_ProcessData(uint16_t threshold){
 
 	static uint16_t sensor_array[13] = {0};		//array storing current sensor values and converted later into {0,1} array

@@ -23,10 +23,33 @@
 */
 volatile uint16_t buforADC[14];
 
+/**
+  * @brief  ADC1 initialization
+  * @param  None
+  * @retval None
+  */
 void ADC_init(void);
+
+/**
+  * @brief  ADC1 GPIO initialization
+  * @param  None
+  * @retval None
+  */
 void ADC_initGPIO(void);
+
+/**
+  * @brief  DMA1 initialization
+  * @param  None
+  * @retval None
+  */
 void ADC_initDMA(void);
-uint16_t ADC_battery(void);
+
+/**
+  * @brief  Li-po voltage measurement (powering up RED LED when low voltage level)
+  * @param  None
+  * @retval None
+  */
+void ADC_BatteryMonitor(void);
 
 
 #endif /* ADC_H_ */
