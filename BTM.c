@@ -254,16 +254,9 @@ void BTM_ProcessBuffor(void){
 		if( flag_pid_ctrl == 1 ){
 			Flag_Start = 0;
 
-			Kp = analyzed_frame[2];
 			PID_Struct.Kp = analyzed_frame[2];
-
-			Kd = analyzed_frame[3];
 			PID_Struct.Kd = analyzed_frame[3];
-
-			Ki = analyzed_frame[4];
 			PID_Struct.Ki = analyzed_frame[4];
-
-			base_speed = analyzed_frame[5];
 			PID_Struct.BaseSpeed = analyzed_frame[5];
 
 			flag_pid_ctrl = 0;
@@ -282,7 +275,7 @@ void BTM_ProcessBuffor(void){
 				break;
 
 			case 2:		/* Sensor calibration */
-				SENSOR_Calibration();
+				PID_Struct.Threshold = SENSOR_Calibration();
 				break;
 
 			case 3:		/* Send current PID parameters */

@@ -34,7 +34,12 @@ void PID_initSTRUCTURE(void){
   * @retval None
   */
 uint16_t SENSOR_Calibration(void){
-	PID_Struct.Threshold = ((buforADC[6]+buforADC[12])/2)-200;
+	static uint16_t threshold = 0;
+	threshold = ((buforADC[6]+buforADC[12])/2)-200;
+	if(threshold > 5000 )
+		threshold = 5000;
+
+	return threshold;
 }
 
 /**
