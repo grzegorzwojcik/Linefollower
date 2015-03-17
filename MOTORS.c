@@ -142,10 +142,10 @@ void MOTOR_set(int16_t MOT_LEFT, int16_t MOT_RIGHT){
 	if( MOT_RIGHT > 660 )
 		MOT_RIGHT = 660;
 
-	if( MOT_LEFT < -660 )
-		MOT_LEFT = -660;
-	if( MOT_RIGHT < -660 )
-		MOT_RIGHT = -660;
+	if( MOT_LEFT < -300 )
+		MOT_LEFT = -300;
+	if( MOT_RIGHT < -300 )
+		MOT_RIGHT = -300;
 
 	/* JEDZ DO PRZODU */
 	if( MOT_LEFT > 0){

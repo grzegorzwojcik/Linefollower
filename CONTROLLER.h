@@ -18,9 +18,9 @@ typedef struct{
 	uint16_t	Threshold;
 	uint16_t	BaseSpeed;
 
-	uint8_t	 Kp;
+	int8_t	 Kp;
 	float	 Ki;
-	uint8_t	 Kd;
+	int8_t	 Kd;
 
 	int16_t Error_setpoint;
 	int16_t Error_current;
