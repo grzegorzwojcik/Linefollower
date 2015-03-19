@@ -31,7 +31,7 @@ int16_t PID_controller(void){
 	static float error_integral = 0;
 
 	/* Derivative and Integral term updated every 10 times slower than P */
-	if( s >= 5 ){
+	if( s >= 10 ){
 		//error_integral += (PID_Struct.Ki/1000)* PID_Struct.Error_current;
 		error_derivative = PID_Struct.Kd * (PID_Struct.Error_current - error_previous);
 		s = 0;
