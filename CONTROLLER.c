@@ -99,8 +99,12 @@ int16_t SENSOR_ProcessData(uint16_t threshold){
 		error_tmp = error;
 	}
 
-	if( sensor_count == 0 )
+	else
 		error = 2*error_tmp;					// double the error in case the lane was lost
 
 	return error;
 }
+
+
+
+//BS 25% KP = 4 KD = 13 KI = 0

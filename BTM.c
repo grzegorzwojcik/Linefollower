@@ -253,7 +253,7 @@ void BTM_ProcessBuffor(void){
 		if( flag_pid_ctrl == 1 ){
 			Flag_Start = 0;
 
-			PID_Struct.Kp = analyzed_frame[2];
+			PID_Struct.Kp = (analyzed_frame[2])/2;
 			PID_Struct.Kd = analyzed_frame[3];
 			PID_Struct.Ki = analyzed_frame[4];
 			PID_Struct.BaseSpeed = (analyzed_frame[5] * 660)/100;
